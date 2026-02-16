@@ -1,0 +1,32 @@
+name: PubMed retrieval
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 6 * * 1'
+
+jobs:
+  run-pubmed-retrieval:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Run PubMed retrieval script
+        run: python pubmed_retrieval.py
+
+      - name: Upload retrieval outputs
+        uses: actions/upload-artifact@v4
+        with:
+          name: pubmed-retrieval-${{ github.run_id }}
+          path: data/pubmed_*
+          if-no-files-found: error
+          retention-days: 14
