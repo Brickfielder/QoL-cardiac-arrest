@@ -38,7 +38,7 @@ When duplicates occur across A and B, row content prefers **B** while preserving
 
 ## Notes
 
-Generated retrieval outputs are intentionally gitignored to keep commits and PRs lightweight.
+Generated retrieval outputs are tracked in `data/` so the latest pipeline output is versioned in the repository.
 
 ## GitHub Actions
 
@@ -47,4 +47,4 @@ A workflow is provided at `.github/workflows/pubmed-retrieval.yml` to run the re
 - Manual trigger: **Actions → PubMed retrieval → Run workflow**
 - Scheduled trigger: every Monday at 06:00 UTC
 
-Each run uploads generated `data/pubmed_*` files as a workflow artifact (retained for 14 days).
+Each run commits and pushes updated `data/pubmed_*` outputs when changes are detected, and also uploads them as a workflow artifact (retained for 14 days).
