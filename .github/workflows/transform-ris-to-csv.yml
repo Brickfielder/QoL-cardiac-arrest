@@ -1,0 +1,19 @@
+name: Transform RIS to CSV
+
+on:
+  workflow_dispatch:
+
+jobs:
+  transform-ris:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Transform RIS and normalize source CSVs
+        run: python scripts/transform/ris_to_csv.py

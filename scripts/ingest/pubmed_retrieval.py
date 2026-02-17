@@ -406,7 +406,7 @@ def merge_rows(rows_a: List[Dict[str, str]], rows_b: List[Dict[str, str]], out_d
 
 
 def main() -> None:
-    out_dir = Path("data")
+    out_dir = Path("data/raw/pubmed")
     out_dir.mkdir(exist_ok=True)
 
     rows_a = run_query(QUERY_A, "A", out_dir)
