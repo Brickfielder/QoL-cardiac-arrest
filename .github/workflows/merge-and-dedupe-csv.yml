@@ -1,0 +1,19 @@
+name: Merge and dedupe CSV
+
+on:
+  workflow_dispatch:
+
+jobs:
+  merge-dedupe:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Merge and dedupe normalized CSV files
+        run: python scripts/dedupe/merge_and_dedupe.py
