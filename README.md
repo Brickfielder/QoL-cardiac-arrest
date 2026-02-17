@@ -15,6 +15,8 @@ The script uses NCBI E-utilities (`esearch` + `efetch`) and writes the following
 
 - `pubmed_A_raw.jsonl`
 - `pubmed_B_raw.jsonl`
+- `pubmed_A.nbib`
+- `pubmed_B.nbib`
 - `pubmed_A.csv`
 - `pubmed_B.csv`
 - `pubmed_merged.csv`
@@ -34,7 +36,12 @@ Deduplication for `pubmed_merged.csv` is applied in this order:
 2. PMID
 3. Normalized `title + year + first_author`
 
-When duplicates occur across A and B, row content prefers **B** while preserving both tags via `query_id=B|A`.
+When duplicates occur across A and B, row content prefers:
+
+1. The row containing an abstract.
+2. If both rows either have or do not have abstracts, **B** is preferred.
+
+Both query tags are preserved via `query_id=B|A`.
 
 ## Notes
 
