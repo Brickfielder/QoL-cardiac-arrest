@@ -3,12 +3,16 @@ from __future__ import annotations
 
 import csv
 import re
+import sys
 from pathlib import Path
 from typing import Dict, List, Tuple
 
 ROOT = Path(__file__).resolve().parents[2]
 NORMALIZED_DIR = ROOT / "data" / "normalized"
 MERGED_PATH = ROOT / "data" / "merged" / "studies_merged.csv"
+
+
+csv.field_size_limit(sys.maxsize)
 
 
 def norm(value: str) -> str:
@@ -65,7 +69,7 @@ def merge_query_ids(existing: str, incoming: str) -> str:
 
 def main() -> None:
     rows: List[Dict[str, str]] = []
-    for csv_file in sorted(NORMALIZED_DIR.glob("*.csv")):
+    for csv_file in sorted(NORMALIZED_DIR.rglob("*.csv")):
         with csv_file.open(newline="", encoding="utf-8") as f:
             for row in csv.DictReader(f):
                 row["source_file"] = row.get("source_file") or csv_file.name

@@ -17,3 +17,10 @@ jobs:
 
       - name: Transform RIS and normalize source CSVs
         run: python scripts/transform/ris_to_csv.py
+
+      - name: Upload normalized CSV files
+        uses: actions/upload-artifact@v4
+        with:
+          name: normalized-csv
+          path: data/normalized/**/*.csv
+          if-no-files-found: error

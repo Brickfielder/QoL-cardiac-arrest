@@ -97,8 +97,17 @@ def write_csv(path: Path, rows: Iterable[Dict[str, str]]) -> None:
 
 
 def normalize_ris_source(source: str) -> None:
-    rows: List[Dict[str, str]] = []
+    source_output_dir = NORMALIZED_DIR / source
+    if source_output_dir.exists():
+        for stale_file in source_output_dir.glob("*.csv"):
+            stale_file.unlink()
+
+    legacy_output = NORMALIZED_DIR / f"{source}.csv"
+    if legacy_output.exists():
+        legacy_output.unlink()
+
     for ris_file in sorted((RAW_DIR / source).glob("*.ris")):
+        rows: List[Dict[str, str]] = []
         for row in parse_ris(ris_file):
             row.update(
                 {
@@ -108,7 +117,7 @@ def normalize_ris_source(source: str) -> None:
                 }
             )
             rows.append(row)
-    write_csv(NORMALIZED_DIR / f"{source}.csv", rows)
+        write_csv(source_output_dir / f"{ris_file.stem}.csv", rows)
 
 
 def normalize_pubmed_csv() -> None:
