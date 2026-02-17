@@ -18,6 +18,7 @@ BATCH_SIZE = 200
 QUERY_A = r'''(
   "Heart Arrest"[Mesh]
   OR "Cardiopulmonary Resuscitation"[Mesh]
+  OR "Out-of-Hospital Cardiac Arrest"[Mesh]
   OR "cardiac arrest"[tiab]
   OR "heart arrest"[tiab]
   OR resuscitation[tiab]
@@ -27,20 +28,28 @@ QUERY_A = r'''(
 )
 AND
 (
-  OHCA[tiab]
+  survivor*[tiab]
+  OR survivorship[tiab]
+  OR follow-up[tiab]
+  OR "follow up"[tiab]
+  OR long-term[tiab]
+  OR postdischarge[tiab]
+  OR "post discharge"[tiab]
+  OR postresuscitation[tiab]
+  OR "post-resuscitation"[tiab]
+  OR "post-cardiac arrest"[tiab]
+  OR "post cardiac arrest"[tiab]
+  OR OHCA[tiab]
   OR IHCA[tiab]
   OR "out-of-hospital"[tiab]
   OR "out of hospital"[tiab]
   OR "in-hospital"[tiab]
   OR "in hospital"[tiab]
-  OR survivor*[tiab]
-  OR survivorship[tiab]
-  OR "post-cardiac arrest"[tiab]
-  OR "post cardiac arrest"[tiab]
 )
 AND
 (
   "Quality of Life"[Mesh]
+  OR "Patient Reported Outcome Measures"[Mesh]
   OR "quality of life"[tiab]
   OR HRQoL[tiab]
   OR QoL[tiab]
@@ -60,6 +69,7 @@ QUERY_B = r'''(
   (
     "Heart Arrest"[Mesh]
     OR "Cardiopulmonary Resuscitation"[Mesh]
+    OR "Out-of-Hospital Cardiac Arrest"[Mesh]
     OR "cardiac arrest"[tiab]
     OR "heart arrest"[tiab]
     OR resuscitation[tiab]
@@ -69,20 +79,28 @@ QUERY_B = r'''(
   )
   AND
   (
-    OHCA[tiab]
+    survivor*[tiab]
+    OR survivorship[tiab]
+    OR follow-up[tiab]
+    OR "follow up"[tiab]
+    OR long-term[tiab]
+    OR postdischarge[tiab]
+    OR "post discharge"[tiab]
+    OR postresuscitation[tiab]
+    OR "post-resuscitation"[tiab]
+    OR "post-cardiac arrest"[tiab]
+    OR "post cardiac arrest"[tiab]
+    OR OHCA[tiab]
     OR IHCA[tiab]
     OR "out-of-hospital"[tiab]
     OR "out of hospital"[tiab]
     OR "in-hospital"[tiab]
     OR "in hospital"[tiab]
-    OR survivor*[tiab]
-    OR survivorship[tiab]
-    OR "post-cardiac arrest"[tiab]
-    OR "post cardiac arrest"[tiab]
   )
   AND
   (
     "Quality of Life"[Mesh]
+    OR "Patient Reported Outcome Measures"[Mesh]
     OR "quality of life"[tiab]
     OR HRQoL[tiab]
     OR QoL[tiab]
@@ -96,18 +114,21 @@ QUERY_B = r'''(
 )
 AND
 (
-  EQ-5D[tiab] OR EQ5D[tiab] OR EuroQol[tiab] OR "EQ VAS"[tiab]
-  OR "SF-36"[tiab] OR SF36[tiab] OR "SF-12"[tiab] OR SF12[tiab] OR "SF-8"[tiab] OR SF8[tiab]
+  EQ-5D[tiab] OR EQ5D[tiab] OR EQ-5D-5L[tiab] OR EQ5D5L[tiab] OR EQ5D-5L[tiab] OR EuroQol[tiab] OR "EQ VAS"[tiab]
+  OR "SF-36"[tiab] OR SF36[tiab] OR "SF 36"[tiab]
+  OR "SF-12"[tiab] OR SF12[tiab] OR "SF 12"[tiab]
+  OR "SF-8"[tiab] OR SF8[tiab] OR "SF 8"[tiab]
   OR "RAND-36"[tiab] OR RAND36[tiab]
   OR "SF-6D"[tiab] OR SF6D[tiab]
   OR "Health Utilities Index"[tiab] OR HUI2[tiab] OR HUI3[tiab]
   OR "15D"[tiab]
   OR "Nottingham Health Profile"[tiab] OR NHP[tiab]
   OR "Sickness Impact Profile"[tiab] OR SIP[tiab]
-  OR WHOQOL[tiab] OR "WHOQOL-BREF"[tiab]
+  OR WHOQOL[tiab] OR "WHOQOL-BREF"[tiab] OR "WHOQOL BREF"[tiab]
   OR "Quality of Well-Being"[tiab] OR QWB[tiab]
   OR PROMIS[tiab] OR "PROMIS Global"[tiab] OR "Global Health"[tiab] OR "PROMIS-29"[tiab]
-  OR "VR-12"[tiab] OR VR12[tiab] OR "VR-36"[tiab] OR VR36[tiab]
+  OR "VR-12"[tiab] OR VR12[tiab] OR "VR 12"[tiab]
+  OR "VR-36"[tiab] OR VR36[tiab] OR "VR 36"[tiab]
   OR "Duke Health Profile"[tiab]
   OR QOLIBRI[tiab]
 )
@@ -133,6 +154,10 @@ CSV_FIELDS = [
     "flag_hrqol_language",
     "flag_timepoint_language",
 ]
+
+
+def has_abstract(row: Dict[str, str]) -> bool:
+    return bool(row.get("abstract", "").strip())
 
 INSTRUMENT_PATTERNS = [
     r"\beq[- ]?5d\b", r"\bsf[- ]?36\b", r"\bsf[- ]?12\b", r"\b15d\b", r"\bhui\b",
@@ -271,6 +296,7 @@ def run_query(query: str, query_id: str, out_dir: Path) -> List[Dict[str, str]]:
     query_key = text_of(root.find("QueryKey"))
 
     rows: List[Dict[str, str]] = []
+    nbib_chunks: List[str] = []
 
     for start in range(0, count, BATCH_SIZE):
         fetch_root = request_xml(
@@ -287,12 +313,21 @@ def run_query(query: str, query_id: str, out_dir: Path) -> List[Dict[str, str]]:
         for article in fetch_root.findall("PubmedArticle"):
             rows.append(parse_article(article, query_id=query_id, date_retrieved=date_retrieved))
 
+        nbib_url = f"{EUTILS_BASE}/efetch.fcgi?{urlencode({'db': DB, 'query_key': query_key, 'WebEnv': webenv, 'retstart': str(start), 'retmax': str(BATCH_SIZE), 'rettype': 'medline', 'retmode': 'text'})}"
+        with urlopen(nbib_url, timeout=60) as resp:
+            nbib_chunks.append(resp.read().decode("utf-8", errors="replace"))
+
     raw_path = out_dir / f"pubmed_{query_id}_raw.jsonl"
+    nbib_path = out_dir / f"pubmed_{query_id}.nbib"
     csv_path = out_dir / f"pubmed_{query_id}.csv"
 
     with raw_path.open("w", encoding="utf-8") as f:
         for row in rows:
             f.write(json.dumps(row, ensure_ascii=False) + "\n")
+
+    with nbib_path.open("w", encoding="utf-8") as f:
+        for chunk in nbib_chunks:
+            f.write(chunk)
 
     with csv_path.open("w", encoding="utf-8", newline="") as f:
         writer = csv.DictWriter(f, fieldnames=CSV_FIELDS)
@@ -341,12 +376,16 @@ def merge_rows(rows_a: List[Dict[str, str]], rows_b: List[Dict[str, str]], out_d
         query_ids = set(existing.get("query_id", "").split("|"))
         query_ids.add(source_query)
 
-        if "B" in query_ids and existing.get("query_id") != "B":
-            if source_query == "B":
-                keep = dict(row)
-                keep["query_id"] = "B"
-                merged[key] = keep
-                existing = merged[key]
+        if has_abstract(row) and not has_abstract(existing):
+            keep = dict(row)
+            keep["query_id"] = source_query
+            merged[key] = keep
+            existing = merged[key]
+        elif has_abstract(row) == has_abstract(existing) and source_query == "B" and existing.get("query_id") == "A":
+            keep = dict(row)
+            keep["query_id"] = source_query
+            merged[key] = keep
+            existing = merged[key]
 
         existing["query_id"] = "B|A" if query_ids == {"A", "B"} else ("B" if "B" in query_ids else "A")
 
