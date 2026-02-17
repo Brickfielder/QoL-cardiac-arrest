@@ -49,9 +49,43 @@ Generated retrieval outputs are tracked in `data/` so the latest pipeline output
 
 ## GitHub Actions
 
-A workflow is provided at `.github/workflows/pubmed-retrieval.yml` to run the retrieval automatically:
+A workflow is provided at `.github/workflows/pubmed-retrieval.yml` to run the retrieval on request:
 
 - Manual trigger: **Actions → PubMed retrieval → Run workflow**
-- Scheduled trigger: every Monday at 06:00 UTC
 
 Each run commits and pushes updated `data/pubmed_*` outputs when changes are detected, and also uploads them as a workflow artifact (retained for 14 days).
+
+## Suggested repo structure for multi-database ingestion
+
+If CINAHL and Web of Science exports are added, the repository can be split into clear ingest/transform/deduplicate stages:
+
+```text
+data/
+  raw/
+    pubmed/
+    cinahl/
+    wos/
+  normalized/
+    pubmed.csv
+    cinahl.csv
+    wos.csv
+  merged/
+    studies_merged.csv
+scripts/
+  ingest/
+    pubmed_retrieval.py
+  transform/
+    ris_to_csv.py
+  dedupe/
+    merge_and_dedupe.py
+```
+
+Recommended workflow:
+
+1. Keep each source export untouched in `data/raw/<source>/` (NBIB for PubMed, RIS for CINAHL/WoS).
+2. Convert each raw format to a shared schema in `data/normalized/` (same columns currently used by PubMed CSV outputs).
+3. Add `source_database` values (`pubmed`, `cinahl`, `wos`) and preserve source-specific identifiers (e.g. accession numbers) in dedicated columns.
+4. Run a single cross-source deduplication step that prioritizes: DOI → PMID/source ID → normalized title + year + first author.
+5. Write final combined datasets to `data/merged/` and keep source-level normalized files for traceability.
+
+This layout keeps provenance clear, makes RIS conversion independent from deduplication, and allows easy future additions of other databases.
