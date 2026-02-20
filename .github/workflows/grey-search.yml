@@ -1,0 +1,34 @@
+name: Grey search pipeline
+
+on:
+  workflow_dispatch:
+
+jobs:
+  run-grey-search:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run grey search package
+        run: python -m grey_search.run
+
+      - name: Upload grey search outputs
+        uses: actions/upload-artifact@v4
+        with:
+          name: grey-search-${{ github.run_id }}
+          path: |
+            data/raw/*.jsonl
+            data/processed/grey_candidates_deduped.ris
+            logs/search_log.jsonl
+          if-no-files-found: error
+          retention-days: 14
