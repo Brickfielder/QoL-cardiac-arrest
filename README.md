@@ -51,3 +51,7 @@ Two manual GitHub Actions are provided for post-ingest processing:
 ## Existing PubMed retrieval action
 
 The existing **PubMed retrieval** workflow is retained and now runs `scripts/ingest/pubmed_retrieval.py`, writing outputs to `data/raw/pubmed/`.
+
+## Search strategy archive
+
+Formatted database queries are stored in `search_strategies.md`.
