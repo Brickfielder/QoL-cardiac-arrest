@@ -1,57 +1,85 @@
-# PubMed retrieval automation for HRQoL PROMs in adult OHCA/IHCA survivors
+# QoL cardiac arrest evidence pipeline
 
-This repository is organized into clear ingest/transform/deduplicate stages for PubMed, CINAHL, and Web of Science exports.
+This repository contains an end-to-end evidence retrieval workflow for health-related quality of life (HRQoL) studies in adult cardiac arrest survivors. It combines:
+
+- **Database ingestion** (PubMed + imported RIS from CINAHL/Web of Science),
+- **Normalization and deduplication**, and
+- **Grey literature search** (OpenAlex, ClinicalTrials.gov, and configured seed sites).
 
 ## Repository structure
 
 ```text
-data/
-  raw/
-    pubmed/
-    cinahl/
-    wos/
-  normalized/
-    pubmed.csv
-    cinahl.csv
-    wos.csv
-  merged/
-    studies_merged.csv
-scripts/
-  ingest/
-    pubmed_retrieval.py
-  transform/
-    ris_to_csv.py
-  dedupe/
-    merge_and_dedupe.py
+.
+├── data/
+│   ├── raw/
+│   │   ├── pubmed/            # PubMed retrieval outputs (.nbib/.csv/.jsonl)
+│   │   ├── cinahl/            # CINAHL RIS exports
+│   │   └── wos/               # Web of Science RIS exports
+│   ├── normalized/            # Per-source normalized CSV files
+│   ├── merged/                # Final merged outputs (e.g., studies_merged.csv)
+│   └── processed/             # Grey-search processed outputs (RIS)
+├── grey_search/
+│   ├── config.yaml            # Grey-search configuration (queries, ranking, stop rules)
+│   ├── run.py                 # Grey-search pipeline entrypoint
+│   ├── sources/               # Source collectors (OpenAlex, ClinicalTrials, seed sites, SerpAPI optional)
+│   └── utils/                 # Ranking, dedupe, text, logging utilities
+├── logs/                      # Runtime logs (e.g., search_log.jsonl)
+├── scripts/
+│   ├── ingest/pubmed_retrieval.py
+│   ├── transform/ris_to_csv.py
+│   └── dedupe/merge_and_dedupe.py
+├── .github/workflows/
+│   ├── pubmed-retrieval.yml
+│   ├── transform-ris-to-csv.yml
+│   ├── merge-and-dedupe-csv.yml
+│   └── grey-search.yml
+├── requirements.txt
+└── search_strategies.md
 ```
 
-## Data placement
+## Core scripts
 
-All source exports are stored in `data/raw/<source>/`:
+1. **PubMed retrieval**  
+   `python scripts/ingest/pubmed_retrieval.py`
+   - Runs two predefined PubMed queries.
+   - Writes query-level `.nbib`, parsed `.csv`, raw `.jsonl`, and a merged PubMed CSV under `data/raw/pubmed/`.
 
-- `data/raw/pubmed/`: NBIB + retrieval outputs.
-- `data/raw/cinahl/`: CINAHL RIS exports.
-- `data/raw/wos/`: Web of Science RIS exports (including split exports when WoS download limits apply).
+2. **RIS → normalized CSV transform**  
+   `python scripts/transform/ris_to_csv.py`
+   - Parses RIS exports in `data/raw/cinahl/` and `data/raw/wos/`.
+   - Normalizes fields and writes CSV files under `data/normalized/`.
+   - Also normalizes PubMed CSV records to `data/normalized/pubmed.csv`.
 
-## Actions
-
-Two manual GitHub Actions are provided for post-ingest processing:
-
-1. **Transform RIS to CSV** (`.github/workflows/transform-ris-to-csv.yml`)
-   - Runs `python scripts/transform/ris_to_csv.py`.
-   - Converts all RIS files in `data/raw/cinahl/` and `data/raw/wos/` into normalized CSV files in `data/normalized/`.
-   - Also consolidates PubMed source CSVs into `data/normalized/pubmed.csv`.
-
-2. **Merge and dedupe CSV** (`.github/workflows/merge-and-dedupe-csv.yml`)
-   - Runs `python scripts/dedupe/merge_and_dedupe.py`.
-   - Merges all CSV files in `data/normalized/`.
-   - Deduplicates in this priority order: DOI → PMID/accession number → normalized title + year + first author.
+3. **Merge + deduplicate**  
+   `python scripts/dedupe/merge_and_dedupe.py`
+   - Merges normalized CSV files.
+   - Deduplicates with priority: DOI → PMID/accession number → normalized title/year/first author.
    - Writes `data/merged/studies_merged.csv`.
 
-## Existing PubMed retrieval action
+4. **Grey search pipeline**  
+   `python -m grey_search.run`
+   - Reads `grey_search/config.yaml`.
+   - Collects from OpenAlex, ClinicalTrials.gov, and configured seed sites.
+   - Scores relevance, filters, deduplicates, and exports RIS to `data/processed/grey_candidates_deduped.ris`.
+   - Writes run logs to `logs/search_log.jsonl`.
 
-The existing **PubMed retrieval** workflow is retained and now runs `scripts/ingest/pubmed_retrieval.py`, writing outputs to `data/raw/pubmed/`.
+## GitHub Actions (manual)
+
+Each workflow in `.github/workflows/` is configured for `workflow_dispatch`:
+
+- **PubMed retrieval** → runs `scripts/ingest/pubmed_retrieval.py`.
+- **Transform RIS to CSV** → runs `scripts/transform/ris_to_csv.py`.
+- **Merge and dedupe CSV** → runs `scripts/dedupe/merge_and_dedupe.py`.
+- **Grey search pipeline** → runs `python -m grey_search.run`.
+
+## Setup
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+```
 
 ## Search strategy archive
 
-Formatted database queries are stored in `search_strategies.md`.
+`search_strategies.md` stores formatted database search strings used by the project.
