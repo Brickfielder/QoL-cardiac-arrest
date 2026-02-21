@@ -3,10 +3,12 @@ from __future__ import annotations
 import os
 import json
 import time
+import shutil
 import pathlib
 from dataclasses import dataclass
 from typing import Dict, List, Any, Iterable
 
+import pandas as pd
 import yaml
 from tqdm import tqdm
 
@@ -71,13 +73,37 @@ def save_ris(path: pathlib.Path, records: Iterable[Dict[str, Any]]) -> None:
             f.write("\n")
 
 
+def save_normalized_csv(path: pathlib.Path, records: Iterable[Dict[str, Any]]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    df = pd.DataFrame(list(records))
+    df.to_csv(path, index=False)
+
+
+def migrate_legacy_outputs(raw_dir: pathlib.Path, processed_dir: pathlib.Path, normalized_path: pathlib.Path) -> None:
+    raw_dir.mkdir(parents=True, exist_ok=True)
+    processed_dir.mkdir(parents=True, exist_ok=True)
+
+    for legacy in pathlib.Path("data/raw").glob("*.jsonl"):
+        shutil.move(str(legacy), str(raw_dir / legacy.name))
+
+    legacy_ris = pathlib.Path("data/processed/grey_candidates_deduped.ris")
+    if legacy_ris.exists() and legacy_ris.resolve() != (processed_dir / legacy_ris.name).resolve():
+        shutil.move(str(legacy_ris), str(processed_dir / legacy_ris.name))
+
+    legacy_csv = pathlib.Path("data/processed/grey_candidates.csv")
+    if legacy_csv.exists() and legacy_csv.resolve() != normalized_path.resolve():
+        shutil.move(str(legacy_csv), str(normalized_path))
+
+
 def main() -> None:
     cfg = load_config()
-    out_dir = pathlib.Path(cfg["project"]["out_dir"])
+    raw_dir = pathlib.Path(cfg["project"].get("raw_dir", "data/raw/grey-literature"))
+    processed_dir = pathlib.Path(cfg["project"].get("processed_dir", "data/processed/grey-literature"))
+    normalized_path = pathlib.Path(cfg["project"].get("normalized_path", "data/normalized/grey-literature.csv"))
     log_dir = pathlib.Path(cfg["project"]["log_dir"])
-    out_raw = out_dir / "raw"
-    out_processed = out_dir / "processed"
     log_dir.mkdir(parents=True, exist_ok=True)
+
+    migrate_legacy_outputs(raw_dir=raw_dir, processed_dir=processed_dir, normalized_path=normalized_path)
 
     stop_cfg = StopConfig(
         n_max=int(cfg["stopping_rules"]["n_max_per_query"]),
@@ -107,7 +133,7 @@ def main() -> None:
             query_id=qid,
             log_path=log_dir / "search_log.jsonl"
         )
-        save_jsonl(out_raw / f"openalex_{qid}.jsonl", oa_records)
+        save_jsonl(raw_dir / f"openalex_{qid}.jsonl", oa_records)
         all_records.extend(oa_records)
 
         log_event(log_dir / "search_log.jsonl", {
@@ -125,7 +151,7 @@ def main() -> None:
             query_id=qid,
             log_path=log_dir / "search_log.jsonl"
         )
-        save_jsonl(out_raw / f"clinicaltrials_{qid}.jsonl", ct_records)
+        save_jsonl(raw_dir / f"clinicaltrials_{qid}.jsonl", ct_records)
         all_records.extend(ct_records)
 
     log_event(log_dir / "search_log.jsonl", {
@@ -135,7 +161,7 @@ def main() -> None:
         "seed_sites": [s["base_url"] for s in cfg.get("seed_sites", [])]
     })
     seed_records = harvest_seed_sites(cfg.get("seed_sites", []), max_pages=80)
-    save_jsonl(out_raw / "seed_sites.jsonl", seed_records)
+    save_jsonl(raw_dir / "seed_sites.jsonl", seed_records)
     all_records.extend(seed_records)
 
     if cfg.get("serpapi", {}).get("enabled", False):
@@ -155,7 +181,7 @@ def main() -> None:
                     api_key=api_key,
                     max_pages=int(cfg["stopping_rules"]["max_pages_google_like"]),
                 )
-                save_jsonl(out_raw / f"serpapi_{engine}_{qid}.jsonl", serp_records)
+                save_jsonl(raw_dir / f"serpapi_{engine}_{qid}.jsonl", serp_records)
                 all_records.extend(serp_records)
 
     for r in all_records:
@@ -165,9 +191,9 @@ def main() -> None:
     filtered = [r for r in all_records if r["relevance_score"] >= cfg["ranking"]["min_score_to_keep"]]
     deduped = dedupe_records(filtered, cfg)
 
-    out_processed.mkdir(parents=True, exist_ok=True)
-    ris_path = out_processed / "grey_candidates_deduped.ris"
+    ris_path = processed_dir / "grey_candidates_deduped.ris"
     save_ris(ris_path, deduped)
+    save_normalized_csv(normalized_path, deduped)
 
     log_event(log_dir / "search_log.jsonl", {
         "ts": now_iso(),
@@ -175,21 +201,18 @@ def main() -> None:
         "raw_n": len(all_records),
         "filtered_n": len(filtered),
         "deduped_n": len(deduped),
-        "output_ris": str(ris_path)
+        "output_ris": str(ris_path),
+        "output_normalized_csv": str(normalized_path),
     })
 
     print(f"Done. Raw={len(all_records)} Filtered={len(filtered)} Deduped={len(deduped)}")
-    print(f"Output: {ris_path}")
+    print(f"Raw output dir: {raw_dir}")
+    print(f"RIS output: {ris_path}")
+    print(f"Normalized CSV: {normalized_path}")
 
 
 def run_with_stopping(source_name: str, fetch_fn, stop_cfg: StopConfig, cfg: Dict[str, Any],
                       query_id: str, log_path: pathlib.Path) -> List[Dict[str, Any]]:
-    """
-    fetch_fn(cursor) -> dict: {"records": [...], "next_cursor": "..."/None}
-    Implements:
-      - hard cap n_max
-      - early stop if after warmup, we see zero_streak_stop consecutive "looks irrelevant"
-    """
     out: List[Dict[str, Any]] = []
     cursor = None
     irrelevant_streak = 0

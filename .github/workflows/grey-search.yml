@@ -27,8 +27,9 @@ jobs:
         with:
           name: grey-search-${{ github.run_id }}
           path: |
-            data/raw/*.jsonl
-            data/processed/grey_candidates_deduped.ris
+            data/raw/grey-literature/*.jsonl
+            data/processed/grey-literature/grey_candidates_deduped.ris
+            data/normalized/grey-literature.csv
             logs/search_log.jsonl
           if-no-files-found: error
           retention-days: 14

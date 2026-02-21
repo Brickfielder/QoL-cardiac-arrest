@@ -1,6 +1,8 @@
 project:
   name: "QoL cardiac arrest grey search"
-  out_dir: "data"
+  raw_dir: "data/raw/grey-literature"
+  processed_dir: "data/processed/grey-literature"
+  normalized_path: "data/normalized/grey-literature.csv"
   log_dir: "logs"
 
 stopping_rules:
