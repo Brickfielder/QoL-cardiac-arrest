@@ -1,0 +1,80 @@
+project:
+  name: "QoL cardiac arrest grey search"
+  raw_dir: "data/raw/grey-literature"
+  processed_dir: "data/processed/grey-literature"
+  normalized_path: "data/normalized/grey-literature.csv"
+  log_dir: "logs"
+
+stopping_rules:
+  n_max_per_query: 200
+  warmup_n: 100
+  zero_hit_streak_stop: 50   # stop early if 50 consecutive hits look irrelevant AFTER warmup
+  max_pages_google_like: 10  # only used if you enable serpapi google
+
+dedupe:
+  use_doi: true
+  use_pmid: true
+  title_fuzzy_threshold: 92
+
+ranking:
+  # Lightweight relevance scoring (transparent + tweakable)
+  include_terms:
+    - "cardiac arrest"
+    - "out-of-hospital"
+    - "in-hospital"
+    - "OHCA"
+    - "IHCA"
+    - "resuscitation"
+    - "ROSC"
+    - "survivor"
+    - "follow-up"
+    - "quality of life"
+    - "HRQoL"
+    - "patient reported"
+    - "PROM"
+    - "EQ-5D"
+    - "SF-36"
+    - "SF-12"
+    - "PROMIS"
+    - "WHOQOL"
+  exclude_terms:
+    - "animal"
+    - "rat"
+    - "mice"
+    - "pediatric"   # remove if you want paeds too
+  min_score_to_keep: 2
+
+queries:
+  - id: "A_high_recall"
+    text: >
+      ("cardiac arrest" OR OHCA OR IHCA OR "out-of-hospital cardiac arrest" OR "in-hospital cardiac arrest")
+      AND ("quality of life" OR HRQoL OR QoL OR PROM OR "patient reported outcome" OR "patient-reported outcome")
+      AND (survivor OR survivorship OR "follow up" OR "follow-up" OR "long term" OR postdischarge OR "post discharge")
+
+  - id: "B_instruments"
+    text: >
+      ("cardiac arrest" OR OHCA OR IHCA)
+      AND ("EQ-5D" OR EuroQol OR "SF-36" OR "SF-12" OR PROMIS OR WHOQOL OR "15D" OR "Health Utilities Index" OR HUI)
+      AND ("quality of life" OR HRQoL OR PROM)
+
+seed_sites:
+  # Put only sites you can justify + that you actually want to cover
+  - name: "European Resuscitation Council"
+    base_url: "https://www.erc.edu"
+    allow_domains: ["erc.edu"]
+  - name: "ILCOR"
+    base_url: "https://www.ilcor.org"
+    allow_domains: ["ilcor.org"]
+  - name: "AHA"
+    base_url: "https://www.heart.org"
+    allow_domains: ["heart.org"]
+  - name: "Resuscitation Council UK"
+    base_url: "https://www.resus.org.uk"
+    allow_domains: ["resus.org.uk"]
+
+serpapi:
+  enabled: false
+  api_key_env: "SERPAPI_API_KEY"
+  engines:
+    - "google_scholar"
+    - "google"
