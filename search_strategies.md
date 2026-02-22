@@ -210,3 +210,50 @@ NOT
 ```
 
 > Note: the mixed `TI/AB` block at the very end of the provided PubMed `QUERY_B` text appears to be EBSCO syntax and is intentionally not included in the cleaned PubMed query.
+
+## Grey literature
+
+Grey literature searching in this project is run through the `grey_search` pipeline (`python -m grey_search.run`) and combines structured Boolean query strings with source-specific collection from OpenAlex, ClinicalTrials.gov, and pre-defined resuscitation guideline/organization websites.
+
+### Query set used in `grey_search/config.yaml`
+
+#### A_high_recall
+
+```text
+("cardiac arrest" OR OHCA OR IHCA OR "out-of-hospital cardiac arrest" OR "in-hospital cardiac arrest")
+AND ("quality of life" OR HRQoL OR QoL OR PROM OR "patient reported outcome" OR "patient-reported outcome")
+AND (survivor OR survivorship OR "follow up" OR "follow-up" OR "long term" OR postdischarge OR "post discharge")
+```
+
+#### B_instruments
+
+```text
+("cardiac arrest" OR OHCA OR IHCA)
+AND ("EQ-5D" OR EuroQol OR "SF-36" OR "SF-12" OR PROMIS OR WHOQOL OR "15D" OR "Health Utilities Index" OR HUI)
+AND ("quality of life" OR HRQoL OR PROM)
+```
+
+### Sources covered
+
+- OpenAlex
+- ClinicalTrials.gov
+- Seed-site crawling (domain-constrained) for:
+  - European Resuscitation Council (`erc.edu`)
+  - ILCOR (`ilcor.org`)
+  - American Heart Association (`heart.org`)
+  - Resuscitation Council UK (`resus.org.uk`)
+
+### Relevance/ranking filters applied after retrieval
+
+- Include-term boosting for cardiac arrest + HRQoL concepts and common QoL instruments (e.g., `EQ-5D`, `SF-36`, `PROMIS`, `WHOQOL`)
+- Exclusion terms: `animal`, `rat`, `mice`, `pediatric`
+- Minimum score to keep candidate: `2`
+
+### Stopping and volume controls
+
+- Maximum records per query: `200`
+- Warm-up window before early stopping: `100`
+- Early stop if consecutive likely-irrelevant hits reaches: `50`
+- Maximum Google-like pages: `10` (applies only if SerpAPI Google engine is enabled)
+
+> Note: SerpAPI is currently configured but disabled by default in this repository (`serpapi.enabled: false`).
