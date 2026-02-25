@@ -1,0 +1,18 @@
+{
+  "timestamp_utc": "2026-02-23T18:35:04+00:00",
+  "pdf_dir": "data/pdfs/calibration-set/caresearchhub",
+  "pdf_count": 10,
+  "page_count": 99,
+  "chunk_count": 263,
+  "papers_with_any_text": 10,
+  "embedding_model": "text-embedding-3-small",
+  "chunk_size": 2000,
+  "chunk_overlap": 200,
+  "reused_embeddings": 263,
+  "new_embeddings": 0,
+  "outputs": {
+    "pages_jsonl": "outputs/index/pages.jsonl",
+    "chunks_jsonl": "outputs/index/chunks.jsonl",
+    "embeddings_jsonl": "outputs/index/embeddings_text-embedding-3-small.jsonl"
+  }
+}

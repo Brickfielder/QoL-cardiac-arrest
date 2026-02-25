@@ -1,1 +1,6 @@
 # Generated PubMed exports are tracked under data/
+
+# Secrets
+.env
+.env.*
+!.env.example
