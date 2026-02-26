@@ -79,16 +79,15 @@ def save_normalized_csv(path: pathlib.Path, records: Iterable[Dict[str, Any]]) -
     df.to_csv(path, index=False)
 
 
-def migrate_legacy_outputs(raw_dir: pathlib.Path, processed_dir: pathlib.Path, normalized_path: pathlib.Path) -> None:
+def migrate_legacy_outputs(raw_dir: pathlib.Path, normalized_path: pathlib.Path) -> None:
     raw_dir.mkdir(parents=True, exist_ok=True)
-    processed_dir.mkdir(parents=True, exist_ok=True)
 
     for legacy in pathlib.Path("data/raw").glob("*.jsonl"):
         shutil.move(str(legacy), str(raw_dir / legacy.name))
 
     legacy_ris = pathlib.Path("data/processed/grey_candidates_deduped.ris")
-    if legacy_ris.exists() and legacy_ris.resolve() != (processed_dir / legacy_ris.name).resolve():
-        shutil.move(str(legacy_ris), str(processed_dir / legacy_ris.name))
+    if legacy_ris.exists() and legacy_ris.resolve() != (raw_dir / legacy_ris.name).resolve():
+        shutil.move(str(legacy_ris), str(raw_dir / legacy_ris.name))
 
     legacy_csv = pathlib.Path("data/processed/grey_candidates.csv")
     if legacy_csv.exists() and legacy_csv.resolve() != normalized_path.resolve():
@@ -98,12 +97,11 @@ def migrate_legacy_outputs(raw_dir: pathlib.Path, processed_dir: pathlib.Path, n
 def main() -> None:
     cfg = load_config()
     raw_dir = pathlib.Path(cfg["project"].get("raw_dir", "data/raw/grey-literature"))
-    processed_dir = pathlib.Path(cfg["project"].get("processed_dir", "data/processed/grey-literature"))
     normalized_path = pathlib.Path(cfg["project"].get("normalized_path", "data/normalized/grey-literature.csv"))
     log_dir = pathlib.Path(cfg["project"]["log_dir"])
     log_dir.mkdir(parents=True, exist_ok=True)
 
-    migrate_legacy_outputs(raw_dir=raw_dir, processed_dir=processed_dir, normalized_path=normalized_path)
+    migrate_legacy_outputs(raw_dir=raw_dir, normalized_path=normalized_path)
 
     stop_cfg = StopConfig(
         n_max=int(cfg["stopping_rules"]["n_max_per_query"]),
@@ -191,7 +189,7 @@ def main() -> None:
     filtered = [r for r in all_records if r["relevance_score"] >= cfg["ranking"]["min_score_to_keep"]]
     deduped = dedupe_records(filtered, cfg)
 
-    ris_path = processed_dir / "grey_candidates_deduped.ris"
+    ris_path = raw_dir / "grey_candidates_deduped.ris"
     save_ris(ris_path, deduped)
     save_normalized_csv(normalized_path, deduped)
 

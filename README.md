@@ -14,10 +14,10 @@ This repository contains an end-to-end evidence retrieval workflow for health-re
 │   ├── raw/
 │   │   ├── pubmed/            # PubMed retrieval outputs (.nbib/.csv/.jsonl)
 │   │   ├── cinahl/            # CINAHL RIS exports
-│   │   └── wos/               # Web of Science RIS exports
+│   │   ├── wos/               # Web of Science RIS exports
+│   │   └── grey-literature/   # Grey-search raw captures + deduped RIS outputs
 │   ├── normalized/            # Per-source normalized CSV files
 │   ├── merged/                # Final merged outputs (e.g., studies_merged.csv)
-│   └── processed/             # Grey-search processed outputs (RIS)
 ├── grey_search/
 │   ├── config.yaml            # Grey-search configuration (queries, ranking, stop rules)
 │   ├── run.py                 # Grey-search pipeline entrypoint
@@ -60,7 +60,7 @@ This repository contains an end-to-end evidence retrieval workflow for health-re
    `python -m grey_search.run`
    - Reads `grey_search/config.yaml`.
    - Collects from OpenAlex, ClinicalTrials.gov, and configured seed sites.
-   - Scores relevance, filters, deduplicates, and exports RIS to `data/processed/grey_candidates_deduped.ris`.
+   - Scores relevance, filters, deduplicates, and exports RIS to `data/raw/grey-literature/grey_candidates_deduped.ris`.
    - Writes run logs to `logs/search_log.jsonl`.
 
 5. **Study PDF download (best-effort, OA-first)**  

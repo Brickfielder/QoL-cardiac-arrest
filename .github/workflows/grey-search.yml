@@ -26,7 +26,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/raw/grey-literature/*.jsonl data/processed/grey-literature/grey_candidates_deduped.ris data/normalized/grey-literature.csv logs/search_log.jsonl
+          git add data/raw/grey-literature/*.jsonl data/raw/grey-literature/grey_candidates_deduped.ris data/normalized/grey-literature.csv logs/search_log.jsonl
           if git diff --cached --quiet; then
             echo "No grey search output changes to commit"
             exit 0
@@ -40,7 +40,7 @@ jobs:
           name: grey-search-${{ github.run_id }}
           path: |
             data/raw/grey-literature/*.jsonl
-            data/processed/grey-literature/grey_candidates_deduped.ris
+            data/raw/grey-literature/grey_candidates_deduped.ris
             data/normalized/grey-literature.csv
             logs/search_log.jsonl
           if-no-files-found: error
