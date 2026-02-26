@@ -3,24 +3,27 @@ from __future__ import annotations
 import argparse
 import json
 import math
-import os
-import random
 import re
-import time
 from collections import defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Literal
 
-from dotenv import load_dotenv
 from openai import OpenAI
+
+from shared import (
+    build_openai_client,
+    call_with_retries,
+    jsonl_append,
+    jsonl_read,
+    jsonl_write,
+    load_pipeline_config,
+)
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
 EMBEDDING_MODEL = "text-embedding-3-small"
 EXTRACTION_MODEL = "gpt-5"
 PROMPT_VERSION = "qol_extract_v1"
-MAX_RETRIES = 5
-RETRY_BASE_SECONDS = 1.5
 DEFAULT_TOP_K_PER_QUERY = 4
 DEFAULT_MAX_CHUNKS_SENT = 20
 
@@ -74,55 +77,6 @@ class ExtractionPayload(StrictModel):
 
 def utc_now_iso() -> str:
     return datetime.now(timezone.utc).replace(microsecond=0).isoformat()
-
-
-def jsonl_read(path: Path):
-    if not path.exists():
-        return
-    with path.open("r", encoding="utf-8") as f:
-        for line in f:
-            line = line.strip()
-            if line:
-                yield json.loads(line)
-
-
-def jsonl_write(path: Path, rows: list[dict]) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    with path.open("w", encoding="utf-8") as f:
-        for row in rows:
-            f.write(json.dumps(row, ensure_ascii=True) + "\n")
-
-
-def jsonl_append(path: Path, rows: list[dict]) -> None:
-    if not rows:
-        return
-    path.parent.mkdir(parents=True, exist_ok=True)
-    with path.open("a", encoding="utf-8") as f:
-        for row in rows:
-            f.write(json.dumps(row, ensure_ascii=True) + "\n")
-
-
-def retry_sleep(attempt: int) -> None:
-    delay = RETRY_BASE_SECONDS * (2 ** (attempt - 1)) + random.uniform(0, 0.25)
-    time.sleep(delay)
-
-
-def call_with_retries(fn):
-    for attempt in range(1, MAX_RETRIES + 1):
-        try:
-            return fn()
-        except Exception:
-            if attempt >= MAX_RETRIES:
-                raise
-            retry_sleep(attempt)
-
-
-def build_client() -> OpenAI:
-    load_dotenv()
-    api_key = os.getenv("OPENAI_API_KEY")
-    if not api_key:
-        raise RuntimeError("OPENAI_API_KEY not found. Put it in project-root .env and load via python-dotenv.")
-    return OpenAI(api_key=api_key)
 
 
 def dot(a: list[float], b: list[float]) -> float:
@@ -363,7 +317,8 @@ def qa_flags(payload: ExtractionPayload, retrieved_chunks: list[dict], total_chu
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Retrieve chunks from local embeddings index and run structured extraction.")
-    parser.add_argument("--out-dir", default="outputs", help="Base output directory.")
+    parser.add_argument("--config", default="pipeline_config.yaml", help="Pipeline config YAML path.")
+    parser.add_argument("--out-dir", default=None, help="Base output directory.")
     parser.add_argument("--paper-id", default=None, help="Optional single paper_id to process.")
     parser.add_argument("--top-k-per-query", type=int, default=DEFAULT_TOP_K_PER_QUERY)
     parser.add_argument("--max-chunks-sent", type=int, default=DEFAULT_MAX_CHUNKS_SENT)
@@ -371,7 +326,9 @@ def main() -> None:
     parser.add_argument("--resume", action="store_true", help="Skip papers already present in outputs/extractions.jsonl and append new results.")
     args = parser.parse_args()
 
-    out_dir = Path(args.out_dir)
+    cfg = load_pipeline_config(args.config)
+    cfg_paths = cfg.get("paths", {})
+    out_dir = Path(args.out_dir or cfg_paths.get("out_dir", "outputs"))
     index_dir = out_dir / "index"
     extractions_path = out_dir / "extractions.jsonl"
 
@@ -397,7 +354,7 @@ def main() -> None:
             return
         raise RuntimeError("No papers selected for extraction.")
 
-    client = build_client()
+    client = build_openai_client()
     query_vectors = embed_queries(client, RETRIEVAL_QUERIES)
 
     all_rows: list[dict] = []

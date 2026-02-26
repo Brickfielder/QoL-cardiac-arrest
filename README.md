@@ -157,6 +157,8 @@ OPENAI_API_KEY=your_key_here
 
 The scripts use `python-dotenv` (`load_dotenv`) and read `OPENAI_API_KEY` from environment variables. Keys are not hardcoded.
 
+The extraction scripts also read defaults from `pipeline_config.yaml` (PDF input/output paths and model names). You can override those defaults with CLI flags such as `--config`, `--pdf-dir`, and `--out-dir`.
+
 ### Pipeline steps and commands
 
 The implementation maps the requested steps as:

@@ -4,25 +4,20 @@ import argparse
 import hashlib
 import json
 import math
-import os
-import random
-import time
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Iterable, Iterator
 
 import pdfplumber
-from dotenv import load_dotenv
 from openai import OpenAI
+
+from shared import build_openai_client, call_with_retries, jsonl_read, jsonl_write, load_pipeline_config
 
 EMBEDDING_MODEL = "text-embedding-3-small"
 CHUNK_SIZE_CHARS = 2000
 CHUNK_OVERLAP_CHARS = 200
 EMBEDDING_BATCH_SIZE = 32
-MAX_RETRIES = 5
-RETRY_BASE_SECONDS = 1.5
-
 
 @dataclass(frozen=True)
 class ChunkRecord:
@@ -41,48 +36,8 @@ def utc_now_iso() -> str:
     return datetime.now(timezone.utc).replace(microsecond=0).isoformat()
 
 
-def jsonl_write(path: Path, rows: Iterable[dict]) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    with path.open("w", encoding="utf-8") as f:
-        for row in rows:
-            f.write(json.dumps(row, ensure_ascii=True) + "\n")
-
-
-def jsonl_read(path: Path) -> Iterator[dict]:
-    if not path.exists():
-        return
-    with path.open("r", encoding="utf-8") as f:
-        for line in f:
-            line = line.strip()
-            if line:
-                yield json.loads(line)
-
-
 def stable_hash(text: str) -> str:
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
-
-
-def retry_sleep(attempt: int) -> None:
-    delay = RETRY_BASE_SECONDS * (2 ** (attempt - 1)) + random.uniform(0, 0.25)
-    time.sleep(delay)
-
-
-def call_with_retries(fn, *, label: str):
-    for attempt in range(1, MAX_RETRIES + 1):
-        try:
-            return fn()
-        except Exception:
-            if attempt >= MAX_RETRIES:
-                raise
-            retry_sleep(attempt)
-
-
-def build_client() -> OpenAI:
-    load_dotenv()
-    api_key = os.getenv("OPENAI_API_KEY")
-    if not api_key:
-        raise RuntimeError("OPENAI_API_KEY not found. Put it in project-root .env and load via python-dotenv.")
-    return OpenAI(api_key=api_key)
 
 
 def find_pdfs(pdf_dir: Path) -> list[Path]:
@@ -157,7 +112,7 @@ def embed_texts(client: OpenAI, texts: list[str]) -> list[list[float]]:
     def _call():
         return client.embeddings.create(model=EMBEDDING_MODEL, input=texts)
 
-    resp = call_with_retries(_call, label="embeddings")
+    resp = call_with_retries(_call)
     return [item.embedding for item in resp.data]
 
 
@@ -167,16 +122,19 @@ def l2_norm(v: list[float]) -> float:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Extract PDF text, chunk pages, and build cached embeddings index.")
-    parser.add_argument("--pdf-dir", default="data/pdfs/calibration-set/caresearchhub", help="Folder containing PDFs.")
-    parser.add_argument("--out-dir", default="outputs", help="Base output directory.")
+    parser.add_argument("--config", default="pipeline_config.yaml", help="Pipeline config YAML path.")
+    parser.add_argument("--pdf-dir", default=None, help="Folder containing PDFs.")
+    parser.add_argument("--out-dir", default=None, help="Base output directory.")
     parser.add_argument("--chunk-size", type=int, default=CHUNK_SIZE_CHARS)
     parser.add_argument("--chunk-overlap", type=int, default=CHUNK_OVERLAP_CHARS)
     parser.add_argument("--batch-size", type=int, default=EMBEDDING_BATCH_SIZE)
     parser.add_argument("--limit", type=int, default=None, help="Optional max number of PDFs (for testing).")
     args = parser.parse_args()
 
-    pdf_dir = Path(args.pdf_dir)
-    out_dir = Path(args.out_dir)
+    cfg = load_pipeline_config(args.config)
+    cfg_paths = cfg.get("paths", {})
+    pdf_dir = Path(args.pdf_dir or cfg_paths.get("pdf_dir", "data/pdfs/calibration-set/caresearchhub"))
+    out_dir = Path(args.out_dir or cfg_paths.get("out_dir", "outputs"))
     index_dir = out_dir / "index"
     pages_path = index_dir / "pages.jsonl"
     chunks_path = index_dir / "chunks.jsonl"
@@ -192,7 +150,7 @@ def main() -> None:
     if not pdfs:
         raise RuntimeError(f"No PDFs found in {pdf_dir}")
 
-    client = build_client()
+    client = build_openai_client()
 
     all_pages: list[dict] = []
     all_chunks: list[ChunkRecord] = []

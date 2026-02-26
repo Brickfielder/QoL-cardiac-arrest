@@ -1,0 +1,6 @@
+paths:
+  pdf_dir: data/pdfs/calibration-set/caresearchhub
+  out_dir: outputs
+models:
+  embedding: text-embedding-3-small
+  extraction: gpt-5
