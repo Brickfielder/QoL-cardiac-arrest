@@ -35,6 +35,8 @@
     completeSummary: document.getElementById("completeSummary"),
     downloadCsvBtn: document.getElementById("downloadCsvBtn"),
     downloadJsonBtn: document.getElementById("downloadJsonBtn"),
+    downloadCsvBtnTop: document.getElementById("downloadCsvBtnTop"),
+    downloadJsonBtnTop: document.getElementById("downloadJsonBtnTop"),
   };
 
   wireEvents();
@@ -54,6 +56,8 @@
     });
     elements.downloadCsvBtn.addEventListener("click", downloadCsv);
     elements.downloadJsonBtn.addEventListener("click", downloadJson);
+    elements.downloadCsvBtnTop.addEventListener("click", downloadCsv);
+    elements.downloadJsonBtnTop.addEventListener("click", downloadJson);
     document.addEventListener("keydown", handleKeyboardDecision);
   }
 
