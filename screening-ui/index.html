@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Abstract Calibration Screener</title>
+  <link rel="stylesheet" href="./styles.css">
+  <script src="./app.js" defer></script>
+</head>
+<body>
+  <div class="bg-shape bg-shape-1" aria-hidden="true"></div>
+  <div class="bg-shape bg-shape-2" aria-hidden="true"></div>
+
+  <main class="layout">
+    <header class="hero">
+      <p class="eyebrow">Calibration Tool</p>
+      <h1>Abstract Screening Interface</h1>
+      <p class="subhead">
+        Upload your calibration <code>.ris</code> file. Records are shown one-by-one in random order with
+        decisions: <strong>Accept</strong>, <strong>Decline</strong>, or <strong>Unsure</strong>.
+      </p>
+    </header>
+
+    <section class="panel uploader-panel">
+      <label for="risFile" class="field-label">RIS file</label>
+      <div class="uploader-row">
+        <input id="risFile" type="file" accept=".ris,text/plain">
+        <button id="loadBtn" class="btn btn-secondary" type="button">Load File</button>
+        <button id="restartBtn" class="btn btn-ghost" type="button" disabled>Restart Session</button>
+      </div>
+      <p id="statusText" class="status">No file loaded.</p>
+      <p class="hint">
+        Keyboard shortcuts during screening: <code>A</code> = Accept, <code>U</code> = Unsure, <code>D</code> = Decline.
+      </p>
+    </section>
+
+    <section id="screeningPanel" class="panel screening-panel hidden">
+      <div class="progress-header">
+        <p id="progressText" class="progress-text">0 / 0 screened</p>
+        <div class="totals">
+          <span id="acceptCount" class="tag tag-accept">Accept: 0</span>
+          <span id="unsureCount" class="tag tag-unsure">Unsure: 0</span>
+          <span id="declineCount" class="tag tag-decline">Decline: 0</span>
+        </div>
+      </div>
+      <div class="progress-bar">
+        <div id="progressFill" class="progress-fill"></div>
+      </div>
+
+      <article class="record">
+        <h2 id="recordTitle" class="record-title">Title</h2>
+        <p id="recordMeta" class="record-meta"></p>
+        <p id="recordDoi" class="record-doi"></p>
+        <p id="recordAbstract" class="record-abstract">Abstract text</p>
+      </article>
+
+      <div id="decisionButtons" class="decision-buttons">
+        <button id="acceptBtn" class="btn btn-accept" type="button">Accept</button>
+        <button id="unsureBtn" class="btn btn-unsure" type="button">Unsure</button>
+        <button id="declineBtn" class="btn btn-decline" type="button">Decline</button>
+      </div>
+    </section>
+
+    <section id="completePanel" class="panel complete-panel hidden">
+      <h2>All abstracts screened.</h2>
+      <p id="completeSummary"></p>
+      <div class="uploader-row">
+        <button id="downloadCsvBtn" class="btn btn-secondary" type="button">Download Decisions CSV</button>
+        <button id="downloadJsonBtn" class="btn btn-ghost" type="button">Download Decisions JSON</button>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

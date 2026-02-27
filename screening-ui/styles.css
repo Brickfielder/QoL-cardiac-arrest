@@ -1,0 +1,347 @@
+@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&family=Space+Grotesk:wght@500;700&display=swap");
+
+:root {
+  --bg: #f4efe4;
+  --panel: rgba(255, 252, 246, 0.82);
+  --border: #d8ccb4;
+  --text: #20313a;
+  --muted: #5f6f78;
+  --accent: #0e7a80;
+  --accent-strong: #0b6469;
+  --accept: #207a3f;
+  --unsure: #b46d0f;
+  --decline: #a23a34;
+  --shadow: 0 12px 28px rgba(32, 49, 58, 0.12);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+}
+
+body {
+  font-family: "Manrope", "Segoe UI", sans-serif;
+  color: var(--text);
+  background:
+    radial-gradient(85vw 60vw at -10% -20%, #e7f2f3 0%, transparent 62%),
+    radial-gradient(70vw 55vw at 110% 0%, #ffe9cc 0%, transparent 58%),
+    linear-gradient(145deg, #f9f6ef 0%, var(--bg) 100%);
+  position: relative;
+  overflow-x: hidden;
+}
+
+.bg-shape {
+  position: fixed;
+  border-radius: 999px;
+  filter: blur(26px);
+  opacity: 0.45;
+  pointer-events: none;
+  z-index: 0;
+  animation: drift 14s ease-in-out infinite alternate;
+}
+
+.bg-shape-1 {
+  width: 280px;
+  height: 280px;
+  background: #c3ecee;
+  top: -80px;
+  right: 6%;
+}
+
+.bg-shape-2 {
+  width: 240px;
+  height: 240px;
+  background: #ffd7a4;
+  bottom: -80px;
+  left: 8%;
+  animation-delay: 1.7s;
+}
+
+.layout {
+  width: min(980px, 94vw);
+  margin: 28px auto 40px;
+  display: grid;
+  gap: 16px;
+  position: relative;
+  z-index: 1;
+}
+
+.hero h1 {
+  margin: 0 0 8px;
+  font-family: "Space Grotesk", "Trebuchet MS", sans-serif;
+  font-size: clamp(1.6rem, 3.6vw, 2.4rem);
+  letter-spacing: -0.02em;
+}
+
+.eyebrow {
+  margin: 0;
+  color: var(--accent-strong);
+  text-transform: uppercase;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  font-size: 0.73rem;
+}
+
+.subhead {
+  margin: 0;
+  max-width: 72ch;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(7px);
+  padding: 16px;
+}
+
+.field-label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 700;
+}
+
+.uploader-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+input[type="file"] {
+  border: 1px dashed var(--border);
+  border-radius: 10px;
+  padding: 8px 9px;
+  background: #fffefb;
+  font-family: inherit;
+  font-size: 0.95rem;
+  color: var(--text);
+  flex: 1;
+  min-width: 250px;
+}
+
+.status {
+  margin: 10px 0 6px;
+  color: var(--accent-strong);
+  font-weight: 600;
+}
+
+.hint {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.btn {
+  border: 1px solid transparent;
+  border-radius: 10px;
+  padding: 9px 14px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 130ms ease, filter 130ms ease, background-color 130ms ease;
+}
+
+.btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.btn:not(:disabled):hover {
+  transform: translateY(-1px);
+  filter: brightness(1.02);
+}
+
+.btn-secondary {
+  background: var(--accent);
+  color: #f4fffe;
+}
+
+.btn-ghost {
+  border-color: var(--border);
+  background: rgba(255, 255, 255, 0.58);
+  color: var(--text);
+}
+
+.screening-panel {
+  animation: reveal 380ms ease;
+}
+
+.progress-header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.progress-text {
+  margin: 0;
+  font-weight: 700;
+}
+
+.totals {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.tag {
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border: 1px solid transparent;
+}
+
+.tag-accept {
+  color: #14512a;
+  background: #dff4e5;
+  border-color: #c1e5cb;
+}
+
+.tag-unsure {
+  color: #70450a;
+  background: #fff0d9;
+  border-color: #f0d5a8;
+}
+
+.tag-decline {
+  color: #6a2621;
+  background: #fde5e1;
+  border-color: #eec2bc;
+}
+
+.progress-bar {
+  margin-top: 10px;
+  width: 100%;
+  height: 10px;
+  border-radius: 999px;
+  background: #ece3d4;
+  overflow: hidden;
+}
+
+.progress-fill {
+  width: 0;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #0d6f74 0%, #26a0a7 100%);
+  transition: width 220ms ease;
+}
+
+.record {
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  margin-top: 14px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.record-title {
+  margin: 0;
+  font-family: "Space Grotesk", "Trebuchet MS", sans-serif;
+  font-size: clamp(1.05rem, 2.5vw, 1.45rem);
+  line-height: 1.28;
+}
+
+.record-meta {
+  margin: 9px 0 8px;
+  color: var(--muted);
+}
+
+.record-doi {
+  margin: 0 0 12px;
+  font-size: 0.93rem;
+}
+
+.record-doi a {
+  color: var(--accent-strong);
+  font-weight: 700;
+}
+
+.record-abstract {
+  margin: 0;
+  line-height: 1.53;
+  white-space: pre-wrap;
+}
+
+.decision-buttons {
+  display: grid;
+  gap: 9px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-top: 12px;
+}
+
+.btn-accept {
+  background: var(--accept);
+  color: #f3fff5;
+}
+
+.btn-unsure {
+  background: var(--unsure);
+  color: #fff9ef;
+}
+
+.btn-decline {
+  background: var(--decline);
+  color: #fff3f2;
+}
+
+.complete-panel {
+  animation: reveal 300ms ease;
+}
+
+.hidden {
+  display: none;
+}
+
+@keyframes reveal {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes drift {
+  from {
+    transform: translateY(0) translateX(0);
+  }
+
+  to {
+    transform: translateY(12px) translateX(10px);
+  }
+}
+
+@media (max-width: 760px) {
+  .layout {
+    margin: 18px auto 26px;
+    gap: 12px;
+  }
+
+  .panel {
+    border-radius: 12px;
+    padding: 13px;
+  }
+
+  input[type="file"] {
+    min-width: 100%;
+  }
+
+  .decision-buttons {
+    grid-template-columns: 1fr;
+  }
+}
