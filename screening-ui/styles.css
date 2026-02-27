@@ -281,6 +281,13 @@ input[type="file"] {
   margin-top: 12px;
 }
 
+.export-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 12px;
+}
+
 .btn-accept {
   background: var(--accept);
   color: #f3fff5;
