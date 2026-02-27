@@ -127,6 +127,15 @@ To run the abstract calibration interface:
 3. Screen each record with `Accept`, `Unsure`, or `Decline`.
 4. Download final decisions as CSV or JSON.
 
+### How the calibration set was selected
+
+The calibration set was built from the entire RIS corpus (4,383 records) using deterministic, rule-based sampling (keywords + instrument names), with no manual pre-screening.
+
+- **Bucket A (Likely include):** Cardiac arrest records that mention a named HRQoL instrument (for example, EQ-5D, SF-36, SF-12, HUI, WHOQOL).
+- **Bucket B (Likely exclude):** Records clearly outside the target scope (for example, non-cardiac-arrest topics, animal studies, or CPR/defibrillation performance papers without PROM language).
+- **Bucket C (Borderline by design):** Cardiac arrest records with HRQoL-adjacent language (QoL wording, function/neurological outcomes, psychological outcomes, or utility terms) but no explicitly named HRQoL instrument.
+- **Bucket D (Pure random):** A random sample from the remaining unsorted pool.
+
 Details: `screening-ui/README.md`.
 
 ## PDF download notes

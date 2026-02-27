@@ -27,6 +27,7 @@
     recordMeta: document.getElementById("recordMeta"),
     recordDoi: document.getElementById("recordDoi"),
     recordAbstract: document.getElementById("recordAbstract"),
+    noteInput: document.getElementById("noteInput"),
     acceptBtn: document.getElementById("acceptBtn"),
     unsureBtn: document.getElementById("unsureBtn"),
     declineBtn: document.getElementById("declineBtn"),
@@ -177,9 +178,11 @@
 
     const recordIndex = state.order[state.cursor];
     const record = state.records[recordIndex];
+    const note = elements.noteInput.value.trim();
     state.decisions.push({
       screen_order: state.cursor + 1,
       decision: decision,
+      screening_note: note,
       decided_at: new Date().toISOString(),
       record_id: record.recordId,
       title: record.title,
@@ -215,6 +218,7 @@
       elements.recordMeta.textContent = "";
       elements.recordDoi.textContent = "";
       elements.recordAbstract.textContent = "Abstract text";
+      elements.noteInput.value = "";
       return;
     }
 
@@ -234,6 +238,7 @@
     elements.decisionButtons.classList.remove("hidden");
     const current = state.records[state.order[state.cursor]];
     renderRecord(current);
+    elements.noteInput.value = "";
   }
 
   function renderRecord(record) {
@@ -436,6 +441,7 @@
     const headers = [
       "screen_order",
       "decision",
+      "screening_note",
       "decided_at",
       "record_id",
       "title",
