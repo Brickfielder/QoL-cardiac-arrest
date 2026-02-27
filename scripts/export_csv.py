@@ -2,17 +2,12 @@ from __future__ import annotations
 
 import argparse
 import csv
-import json
 from itertools import product
 from pathlib import Path
 
+from shared import jsonl_read, load_pipeline_config
 
-def jsonl_read(path: Path):
-    with path.open("r", encoding="utf-8") as f:
-        for line in f:
-            line = line.strip()
-            if line:
-                yield json.loads(line)
+
 
 
 def to_pairs(record: dict) -> list[dict]:
@@ -64,12 +59,16 @@ def to_pairs(record: dict) -> list[dict]:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Export extraction JSONL to a review-friendly CSV.")
-    parser.add_argument("--input", default="outputs/extractions.jsonl", help="Paper-level extraction JSONL path.")
-    parser.add_argument("--output", default="outputs/extractions.csv", help="Output CSV path.")
+    parser.add_argument("--config", default="pipeline_config.yaml", help="Pipeline config YAML path.")
+    parser.add_argument("--input", default=None, help="Paper-level extraction JSONL path.")
+    parser.add_argument("--output", default=None, help="Output CSV path.")
     args = parser.parse_args()
 
-    input_path = Path(args.input)
-    output_path = Path(args.output)
+    cfg = load_pipeline_config(args.config)
+    cfg_paths = cfg.get("paths", {})
+    out_dir = Path(cfg_paths.get("out_dir", "outputs"))
+    input_path = Path(args.input) if args.input else out_dir / "extractions.jsonl"
+    output_path = Path(args.output) if args.output else out_dir / "extractions.csv"
     if not input_path.exists():
         raise FileNotFoundError(f"Input JSONL not found: {input_path}")
 

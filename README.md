@@ -87,7 +87,7 @@ This repository contains an end-to-end evidence retrieval workflow for health-re
    `python -m grey_search.run`
    - Reads `grey_search/config.yaml`.
    - Collects from OpenAlex, ClinicalTrials.gov, and configured seed sites.
-   - Scores relevance, filters, deduplicates, and exports RIS to `data/processed/grey_candidates_deduped.ris`.
+   - Scores relevance, filters, deduplicates, and exports RIS to `data/raw/grey-literature/grey_candidates_deduped.ris`.
    - Writes run logs to `logs/search_log.jsonl`.
 
 5. **Study PDF download (best-effort, OA-first)**  
@@ -194,6 +194,8 @@ OPENAI_API_KEY=your_key_here
 ```
 
 The scripts use `python-dotenv` (`load_dotenv`) and read `OPENAI_API_KEY` from environment variables. Keys are not hardcoded.
+
+The extraction scripts also read defaults from `pipeline_config.yaml` (PDF input/output paths and model names). You can override those defaults with CLI flags such as `--config`, `--pdf-dir`, and `--out-dir`.
 
 ### Pipeline steps and commands
 
