@@ -6,7 +6,6 @@ import { z } from "zod";
 
 import { getDb } from "@/db";
 import { users } from "@/db/schema";
-import { requireEnv } from "@/lib/env";
 
 const credentialsSchema = z.object({
   email: z.email(),
@@ -14,7 +13,9 @@ const credentialsSchema = z.object({
 });
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
-  secret: requireEnv("NEXTAUTH_SECRET"),
+  // Keep build-time module evaluation from failing in preview deploys;
+  // auth requests still rely on the real secret being present at runtime.
+  secret: process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET,
   pages: {
     signIn: "/login",
   },
