@@ -4,18 +4,6 @@ import { redirect } from "next/navigation";
 import { auth, signIn } from "@/auth";
 import { APP_TITLE } from "@/lib/constants";
 
-const bucketCounts = [
-  { label: "Included", total: 197 },
-  { label: "Non-original", total: 56 },
-  { label: "Protocol / ongoing", total: 33 },
-  { label: "Wrong population / scope", total: 27 },
-  { label: "Qualitative only", total: 15 },
-  { label: "No global QoL", total: 12 },
-  { label: "Not retrieved", total: 14 },
-  { label: "Duplicate report row", total: 4 },
-  { label: "Duplicate bibliographic variant", total: 3 },
-];
-
 export default async function LoginPage(props: {
   searchParams?: Promise<{ error?: string }>;
 }) {
@@ -28,47 +16,38 @@ export default async function LoginPage(props: {
   const invalid = searchParams?.error === "invalid";
 
   return (
-    <main className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(122,38,39,0.16),_transparent_33%),radial-gradient(circle_at_bottom_right,_rgba(90,60,30,0.1),_transparent_28%),linear-gradient(180deg,_#fbf6ee_0%,_#f1e7d7_100%)] px-4 py-6 sm:px-6">
-      <div className="mx-auto grid min-h-[calc(100vh-3rem)] max-w-[1440px] gap-6 lg:grid-cols-[1.2fr_0.8fr]">
-        <section className="overflow-hidden rounded-[2.2rem] border border-[var(--line)] bg-[linear-gradient(155deg,_rgba(122,38,39,0.95),_rgba(59,17,20,0.92))] p-8 text-white shadow-[0_40px_110px_-55px_rgba(36,18,18,0.85)] sm:p-10">
-          <div className="flex h-full flex-col justify-between gap-10">
-            <div className="space-y-5">
+    <main className="flex min-h-screen items-center bg-[radial-gradient(circle_at_top_left,_rgba(122,38,39,0.16),_transparent_33%),radial-gradient(circle_at_bottom_right,_rgba(90,60,30,0.1),_transparent_28%),linear-gradient(180deg,_#fbf6ee_0%,_#f1e7d7_100%)] px-4 py-10 sm:px-6">
+      <div className="mx-auto grid w-full max-w-[1120px] items-stretch gap-5 lg:grid-cols-2">
+        <section className="h-full min-h-[24rem] overflow-hidden rounded-[1.8rem] border border-[var(--line)] bg-[linear-gradient(155deg,_rgba(122,38,39,0.95),_rgba(59,17,20,0.92))] p-6 text-white shadow-[0_30px_80px_-48px_rgba(36,18,18,0.85)] sm:p-7">
+          <div className="flex h-full flex-col justify-center">
+            <div className="max-w-[31rem] space-y-5">
               <p className="text-xs font-semibold uppercase tracking-[0.32em] text-white/75">Private evidence workspace</p>
-              <div className="max-w-2xl space-y-5">
-                <h1 className="font-[family-name:var(--font-display)] text-5xl leading-[0.95] sm:text-6xl">
+              <div className="space-y-4">
+                <h1 className="max-w-[11ch] font-[family-name:var(--font-display)] text-4xl leading-[0.95] sm:text-5xl">
                   {APP_TITLE}
                 </h1>
-                <p className="max-w-xl text-base leading-8 text-white/78">
+                <p className="max-w-[29rem] text-sm leading-7 text-white/78 sm:text-[0.95rem]">
                   A password-protected research environment for the HRQoL in cardiac arrest survivor review,
                   preserving search provenance, full-text bucket decisions, included-study metadata, and the
                   canonical PDF set in one place.
                 </p>
               </div>
             </div>
-
-            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-              {bucketCounts.map((item) => (
-                <div key={item.label} className="rounded-[1.5rem] border border-white/12 bg-white/8 p-4 backdrop-blur-sm">
-                  <p className="text-xs uppercase tracking-[0.22em] text-white/62">{item.label}</p>
-                  <p className="mt-3 font-[family-name:var(--font-display)] text-4xl">{item.total}</p>
-                </div>
-              ))}
-            </div>
           </div>
         </section>
 
-        <section className="flex items-center">
-          <div className="w-full rounded-[2rem] border border-[var(--line)] bg-[rgba(255,252,247,0.92)] p-8 shadow-[0_35px_95px_-55px_rgba(36,18,18,0.65)] sm:p-10">
-            <div className="space-y-4">
+        <section className="flex h-full">
+          <div className="flex min-h-[24rem] w-full flex-col justify-center rounded-[1.8rem] border border-[var(--line)] bg-[rgba(255,252,247,0.92)] p-6 shadow-[0_30px_80px_-48px_rgba(36,18,18,0.65)] sm:p-7">
+            <div className="space-y-3">
               <p className="text-xs font-semibold uppercase tracking-[0.28em] text-[var(--accent)]">Sign in</p>
-              <h2 className="font-[family-name:var(--font-display)] text-4xl text-[var(--ink)]">Open the workspace</h2>
+              <h2 className="font-[family-name:var(--font-display)] text-3xl text-[var(--ink)] sm:text-[2rem]">Open the workspace</h2>
               <p className="text-sm leading-7 text-[var(--muted-ink)]">
                 Use your editor or admin credentials. Public sign-up is disabled.
               </p>
             </div>
 
             <form
-              className="mt-8 space-y-5"
+              className="mt-6 space-y-4"
               action={async (formData) => {
                 "use server";
 
