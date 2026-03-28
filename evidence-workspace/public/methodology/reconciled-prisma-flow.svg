@@ -1,0 +1,131 @@
+<svg width="1142" height="1775" viewBox="0 0 1142 1775" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      .frame { fill: #fbfaf8; stroke: #2d314a; stroke-width: 3; }
+      .panel { fill: #fffdfb; stroke: #2d314a; stroke-width: 3; }
+      .label { fill: #111827; font-family: "Courier New", monospace; font-size: 24px; text-anchor: middle; }
+      .small { font-size: 21px; }
+      .section { fill: #111827; font-family: "Courier New", monospace; font-size: 22px; text-anchor: middle; }
+      .arrow { stroke: #111827; stroke-width: 3; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+    </style>
+    <marker id="arrowhead" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M0,0 L12,6 L0,12 Z" fill="#111827" />
+    </marker>
+    <filter id="shadow" x="-5%" y="-5%" width="110%" height="110%">
+      <feDropShadow dx="10" dy="8" stdDeviation="0" flood-color="#d9dbe3" flood-opacity="1" />
+    </filter>
+  </defs>
+
+  <rect x="160" y="16" width="890" height="725" class="frame" filter="url(#shadow)" />
+  <text x="605" y="38" class="section">Identification</text>
+
+  <rect x="244" y="52" width="343" height="284" class="panel" />
+  <text x="416" y="92" class="label">
+    <tspan x="416" dy="0">Records identified from</tspan>
+    <tspan x="416" dy="40">databases</tspan>
+    <tspan x="416" dy="40">PubMed: 3017</tspan>
+    <tspan x="416" dy="40">CINAHL: 596</tspan>
+    <tspan x="416" dy="40">Web of Science: 3186</tspan>
+    <tspan x="416" dy="40">n = 6799</tspan>
+  </text>
+
+  <rect x="658" y="84" width="343" height="190" class="panel" />
+  <text x="829" y="124" class="label">
+    <tspan x="829" dy="0">Records identified from</tspan>
+    <tspan x="829" dy="40">other sources</tspan>
+    <tspan x="829" dy="40">Grey literature</tspan>
+    <tspan x="829" dy="40">n = 237</tspan>
+  </text>
+
+  <rect x="452" y="409" width="340" height="126" class="panel" />
+  <text x="622" y="447" class="label">
+    <tspan x="622" dy="0">Duplicate / near-duplicate</tspan>
+    <tspan x="622" dy="32">records removed before</tspan>
+    <tspan x="622" dy="32">ASReview</tspan>
+    <tspan x="622" dy="32">n = 2653</tspan>
+  </text>
+
+  <rect x="452" y="577" width="340" height="126" class="panel" />
+  <text x="622" y="617" class="label">
+    <tspan x="622" dy="0">Unique records sent to</tspan>
+    <tspan x="622" dy="32">ASReview</tspan>
+    <tspan x="622" dy="32">n = 4383</tspan>
+  </text>
+
+  <path d="M415 336 V360 C415 386 452 397 468 409" class="arrow" marker-end="url(#arrowhead)" />
+  <path d="M829 274 V350 C829 376 792 392 776 407" class="arrow" marker-end="url(#arrowhead)" />
+  <path d="M622 535 V566" class="arrow" marker-end="url(#arrowhead)" />
+
+  <rect x="10" y="814" width="1048" height="399" class="frame" filter="url(#shadow)" />
+  <text x="534" y="836" class="section">Screening</text>
+
+  <rect x="244" y="850" width="343" height="127" class="panel" />
+  <text x="416" y="889" class="label">
+    <tspan x="416" dy="0">Records screened during</tspan>
+    <tspan x="416" dy="32">ASReview active learning</tspan>
+    <tspan x="416" dy="32">n = 1339</tspan>
+  </text>
+
+  <rect x="658" y="850" width="343" height="127" class="panel" />
+  <text x="829" y="889" class="label">
+    <tspan x="829" dy="0">Records not screened after</tspan>
+    <tspan x="829" dy="32">ASReview stopping point</tspan>
+    <tspan x="829" dy="32">n = 3044</tspan>
+  </text>
+
+  <rect x="63" y="1049" width="341" height="127" class="panel" />
+  <text x="234" y="1088" class="label">
+    <tspan x="234" dy="0">Records excluded by</tspan>
+    <tspan x="234" dy="32">ASReview as irrelevant</tspan>
+    <tspan x="234" dy="32">n = 978</tspan>
+  </text>
+
+  <rect x="477" y="1065" width="239" height="96" class="panel" />
+  <text x="597" y="1104" class="label">
+    <tspan x="597" dy="0">ASReview relevant</tspan>
+    <tspan x="597" dy="32">n = 361</tspan>
+  </text>
+
+  <path d="M622 703 V747 C622 772 416 806 416 840" class="arrow" marker-end="url(#arrowhead)" />
+  <path d="M622 703 V747 C622 772 829 806 829 840" class="arrow" marker-end="url(#arrowhead)" />
+  <path d="M416 977 C416 1000 262 1010 234 1040" class="arrow" marker-end="url(#arrowhead)" />
+  <path d="M416 977 C416 1000 579 1017 597 1054" class="arrow" marker-end="url(#arrowhead)" />
+
+  <rect x="360" y="1289" width="491" height="452" class="frame" filter="url(#shadow)" />
+  <text x="606" y="1311" class="section">Eligibility / full-text</text>
+
+  <rect x="425" y="1325" width="341" height="103" class="panel" />
+  <text x="596" y="1364" class="label">
+    <tspan x="596" dy="0">Full-text / detailed</tspan>
+    <tspan x="596" dy="32">assessment</tspan>
+  </text>
+
+  <rect x="409" y="1531" width="343" height="257" class="panel" />
+  <text x="581" y="1571" class="label small">
+    <tspan x="581" dy="0">Reports excluded at full-</tspan>
+    <tspan x="581" dy="30">text / detailed assessment</tspan>
+    <tspan x="581" dy="30">n = 164</tspan>
+    <tspan x="581" dy="44">Non-original: 56</tspan>
+    <tspan x="581" dy="30">Protocol or ongoing: 33</tspan>
+    <tspan x="581" dy="30">Wrong population or scope:</tspan>
+    <tspan x="581" dy="30">27</tspan>
+    <tspan x="581" dy="30">Qualitative only: 15</tspan>
+    <tspan x="581" dy="30">No global QoL: 12</tspan>
+    <tspan x="581" dy="30">Not retrieved: 14</tspan>
+    <tspan x="581" dy="30">Duplicate report row: 4</tspan>
+    <tspan x="581" dy="30">Duplicate bibliographic</tspan>
+    <tspan x="581" dy="30">variant: 3</tspan>
+  </text>
+
+  <rect x="889" y="1502" width="242" height="271" class="frame" filter="url(#shadow)" />
+  <text x="1010" y="1524" class="section">Included</text>
+  <rect x="942" y="1620" width="137" height="98" class="panel" />
+  <text x="1010" y="1659" class="label">
+    <tspan x="1010" dy="0">Included</tspan>
+    <tspan x="1010" dy="32">n = 197</tspan>
+  </text>
+
+  <path d="M597 1161 V1206 C597 1240 596 1247 596 1275" class="arrow" marker-end="url(#arrowhead)" />
+  <path d="M596 1428 C596 1455 581 1482 581 1520" class="arrow" marker-end="url(#arrowhead)" />
+  <path d="M682 1428 C727 1451 690 1494 727 1527 C801 1593 899 1607 949 1642" class="arrow" marker-end="url(#arrowhead)" />
+</svg>
